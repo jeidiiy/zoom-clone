@@ -1,5 +1,5 @@
 import http from 'http';
-import WebSocket from 'ws';
+import SocketIO from 'socket.io';
 import express from 'express';
 
 const app = express();
@@ -11,12 +11,20 @@ app.get('/', (req, res) => res.render('home'));
 
 const handleListen = () => console.log('Listening on http://localhost:3000');
 
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
 
+wsServer.on('connection', (socket) => {
+  socket.on('enter_room', (roomName, done) => {
+    console.log(roomName);
+    setTimeout(() => {
+      done("hello from the backend");
+    }, 1000);
+  });
+});
+
+/* const sockets = [];
 const wss = new WebSocket.Server({ server });
-
-const sockets = [];
-
 wss.on('connection', (socket) => {
   sockets.push(socket);
   socket['nickname'] = 'Anon';
@@ -34,6 +42,6 @@ wss.on('connection', (socket) => {
         socket['nickname'] = message.payload;
     }
   });
-});
+}); */
 
-server.listen(3000, handleListen);
+httpServer.listen(3000, handleListen);
